@@ -2,6 +2,8 @@
 
 $Sleep_Time = "3";
 
+if (@$_POST["String"] == "Get_File_Content"){echo file_get_contents("Edit_File_Content.txt"); return;}
+
 if (isset($_POST["String"])){
 
 $File = "Edit_File_Content.txt";
@@ -63,6 +65,7 @@ Each request takes <?php echo $Sleep_Time ?> seconds to finish!
 <br><br>
 <input type="button"  value="Add A" onclick='Add_String("A")'>
 <input type="button"  value="Add B" onclick='Add_String("B")'>
+<input type="button"  value="Get File Content" onclick='Add_String("Get_File_Content")'>
 <br><br>
 <div id="Ajax_Response">Ajax Response:<br><br></div>
 
