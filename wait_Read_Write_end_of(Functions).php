@@ -11,7 +11,7 @@ if (isset($_POST["Request"])){
     }elseif($_POST["Request"] == "LSH_R"){
 
         wait_Write_end_of($File, function($F_P){        //waits here if an older process is writing  the file until the file is unlocked!
-        sleep($GLOBALS["Read_Sleep"]); return file_get_contents($F_P);      //the read process takes some time to finish (Large Files)
+        sleep($GLOBALS["Read_Sleep"]); return file_get_contents($F_P);                   //the read process takes some time to finish (Large Files)
         }, $File_Content, $flock_Message);
 
     echo ($flock_Message) ? $File_Content : "flock() failed";       //"wait_Write_end_of()" returns the same value as "$flock_Message"
@@ -33,7 +33,9 @@ if (isset($_POST["Request"])){
 
     }else{
 
-        wait_Read_Write_end_of($File, function($F_P){       //waits here if an older process is reading or writing the file until the file is unlocked!
+        wait_Read_Write_end_of($File, function($F_P)use($Write_Sleep, &$W_M){    //waits here if an older process is reading or writing the file until the file is unlocked!
+
+            //"&" allows this anonymous function to Get\Set "$W_M" variable from it's parent scope (In this case, the main script scope)!
 
         $File_Content = file_get_contents($F_P);
         $File_Content = str_replace("x", "w", $File_Content);
@@ -42,15 +44,17 @@ if (isset($_POST["Request"])){
  
         $File_Handle = fopen($F_P, 'w');
 
-        sleep($GLOBALS["Write_Sleep"]); fwrite($File_Handle, $File_Content . "x");      //the write process takes some time to finish (Large Files)
+        sleep($Write_Sleep); fwrite($File_Handle, $File_Content . "x");      //the write process takes some time to finish (Large Files)
             
         fclose($File_Handle);
+        
+        $W_M = "x to w";        //the "$W_M" variable from this anonymous fucntion parent scope, the main script in this case, is also set to same value!
 
-        return "x to w (x Added)";
+        return " (x Added)";      //this return value will be stored in "$Write_Message" var below
 
         }, $Write_Message, $flock_Message);
 
-    echo ($flock_Message) ? $Write_Message : "flock() failed";     //"wait_Read_Write_end_of()" returns the same value as "$flock_Message"
+    echo ($flock_Message) ? $W_M . $Write_Message : "flock() failed";     //"wait_Read_Write_end_of()" returns the same value as "$flock_Message"
     }
 
 return;
